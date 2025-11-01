@@ -1,22 +1,20 @@
-[data-component='board'] {
+[data-component='table'] {
 	--base-unit: 1.5rem;
 
 	--card-gap: calc(var(--base-unit) * 0.25);
 	--card-height: calc(var(--base-unit) * 3.5);
 	--card-width: calc(var(--base-unit) * 2.5);
 
-	--area-gap: calc(var(--card-gap) * 2);
-
 	--card-back: #9cf;
 
-	display: grid;
+	display: flex;
+	flex-direction: column;
 	font-family: Arial, Helvetica, sans-serif;
-	gap: var(--card-gap);
-	grid-template-columns: repeat(8, 1fr);
-	grid-template-rows: repeat(4, auto);
-	width: calc(var(--card-width) * 8);
+	gap: calc(var(--card-gap) * 2);
+	/** 8 cards + 7 gaps in between + 3 double-wide gaps */
+	width: calc((var(--card-width) * 8) + (var(--card-gap) * 10));
 
-	[data-slot] {
+	[data-slot]:not([data-slot$='hand']) {
 		align-items: center;
 		background-color: #f0f0f0;
 		border: 1px solid #ccc;
@@ -28,6 +26,25 @@
 		user-select: none;
 		width: var(--card-width);
 	}
+
+	[data-slot$='hand'] {
+		display: flex;
+		justify-content: center;
+		gap: var(--card-gap);
+	}
+
+	/** FACEDOWN CARDS */
+	[data-slot='foes-hand'] [data-slot],
+	[data-stack]:not([data-stack='0']) {
+		background: var(--card-back);
+	}
+}
+
+[data-component='board'] {
+	display: grid;
+	gap: var(--card-gap);
+	grid-template-columns: repeat(8, 1fr);
+	grid-template-rows: repeat(4, auto);
 
 	/** GRID GAPS (for +readability) */
 
@@ -50,10 +67,5 @@
 
 	.long-text {
 		font-size: 0.8rem;
-	}
-
-	/** FACEDOWN CARDS */
-	[data-stack]:not([data-stack='0']) {
-		background: var(--card-back);
 	}
 }

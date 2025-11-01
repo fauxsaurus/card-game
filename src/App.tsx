@@ -74,8 +74,13 @@ function App() {
 	const foeDefenders = state.players[1].defenders
 
 	return (
-		<>
+		<section data-component="table">
 			<Todo />
+			<div data-slot="foes-hand">
+				{state.players[1].hand.map((cardId, i) => (
+					<div data-slot={`foes-hand-${i}`} data-facedown="true" key={cardId}></div>
+				))}
+			</div>
 			<div data-component="board">
 				<div data-slot="foes-deck" data-stack={foeDeckSize}>
 					{foeDeckSize}
@@ -203,7 +208,17 @@ function App() {
 					{yourDeckSize}
 				</div>
 			</div>
-			<div data-slot="your-hand"></div>
+			<div data-slot="your-hand">
+				{state.players[0].hand.map((cardId, i) => {
+					const card = CARD_LIST[state.cards[cardId].cardNumber]
+
+					return (
+						<div data-slot={`your-hand-${i}`} key={cardId}>
+							({card.cardNumber}) {card.pow}
+						</div>
+					)
+				})}
+			</div>
 			{!state.history.length && (
 				<button onClick={() => setState({type: 'shuffle'})}>Shuffle Decks</button>
 			)}
@@ -216,7 +231,7 @@ function App() {
 				<header>State:</header>
 				<pre>{stringifyState(state)}</pre>
 			</output>
-		</>
+		</section>
 	)
 }
 
