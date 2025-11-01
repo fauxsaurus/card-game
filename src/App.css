@@ -10,17 +10,32 @@
 	--card-back: #9cf;
 
 	display: grid;
+	font-family: Arial, Helvetica, sans-serif;
 	gap: var(--card-gap);
 	grid-template-columns: repeat(8, 1fr);
 	grid-template-rows: repeat(4, auto);
 	width: calc(var(--card-width) * 8);
+
 	[data-slot] {
+		align-items: center;
 		background-color: #f0f0f0;
 		border: 1px solid #ccc;
+		display: flex;
 		height: var(--card-height);
+		justify-content: center;
 		padding: var(--card-gap);
 		text-align: center;
+		user-select: none;
 		width: var(--card-width);
+	}
+
+	[data-empty='true'],
+	[data-stack='0'] {
+		color: #0006;
+	}
+
+	.long-text {
+		font-size: 0.8rem;
 	}
 
 	[data-slot]:nth-child(8n + 2),	/** @note divide fist col */
