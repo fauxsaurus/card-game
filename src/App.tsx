@@ -5,6 +5,41 @@ import {Todo} from './todo'
 
 import './App.css'
 
+const stringifyState = <T,>(obj: T, space = 4) => {
+	const jsonString = JSON.stringify(
+		obj,
+		(key, value) => {
+			// print integer arrays on one line
+			if (Array.isArray(value) && value.every(item => typeof item === 'number'))
+				return JSON.stringify(value)
+
+			// print small objects on one line
+			if (
+				!['history', 'players'].includes(key) &&
+				typeof value === 'object' &&
+				Object.keys(value).length <= 2
+			)
+				return JSON.stringify(value)
+
+			// default stringification
+			return value
+		},
+		space
+	)
+
+	return (
+		jsonString
+			// Unescape internal quotes
+			.replace(/\\"/g, '"')
+			// unescape arrays
+			.replace(/"\[/g, '[')
+			.replace(/]"/g, ']')
+			// unescape objects
+			.replace(/"\{/g, '{')
+			.replace(/}"/g, '}')
+	)
+}
+
 const immerReducer = produce((state: IState, action: IAction) => {
 	switch (action.type) {
 		case 'shuffle':
@@ -179,7 +214,7 @@ function App() {
 			)}
 			<output>
 				<header>State:</header>
-				<pre>{JSON.stringify(state, null, 4)}</pre>
+				<pre>{stringifyState(state)}</pre>
 			</output>
 		</>
 	)
