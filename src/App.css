@@ -29,6 +29,20 @@
 		width: var(--card-width);
 	}
 
+	/** GRID GAPS (for +readability) */
+
+	/** @note divide rows */
+	[data-slot]:nth-child(n + 17):nth-child(-n + 24) {
+		margin-top: var(--card-gap);
+	}
+
+	[data-slot]:nth-child(8n + 2),	/** @note divide fist col */
+	[data-slot]:nth-child(8n + 5),	/** @note divide middle col */
+	[data-slot]:nth-child(8n + 8) /** @note divide last col */ {
+		margin-left: var(--card-gap);
+	}
+
+	/** CARD SLOT LABELS */
 	[data-empty='true'],
 	[data-stack='0'] {
 		color: #0006;
@@ -38,17 +52,7 @@
 		font-size: 0.8rem;
 	}
 
-	[data-slot]:nth-child(8n + 2),	/** @note divide fist col */
-	[data-slot]:nth-child(8n + 5),	/** @note divide middle col */
-	[data-slot]:nth-child(8n + 8) /** @note divide last col */ {
-		margin-left: var(--card-gap);
-	}
-
-	/** @note divide rows */
-	[data-slot]:nth-child(n + 17):nth-child(-n + 24) {
-		margin-top: var(--card-gap);
-	}
-
+	/** FACEDOWN CARDS */
 	[data-stack]:not([data-stack='0']) {
 		background: var(--card-back);
 	}
