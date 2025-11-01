@@ -1,0 +1,40 @@
+[data-component='board'] {
+	--base-unit: 1.5rem;
+
+	--card-gap: calc(var(--base-unit) * 0.25);
+	--card-height: calc(var(--base-unit) * 3.5);
+	--card-width: calc(var(--base-unit) * 2.5);
+
+	--area-gap: calc(var(--card-gap) * 2);
+
+	--card-back: #9cf;
+
+	display: grid;
+	gap: var(--card-gap);
+	grid-template-columns: repeat(8, 1fr);
+	grid-template-rows: repeat(4, auto);
+	width: calc(var(--card-width) * 8);
+	[data-slot] {
+		background-color: #f0f0f0;
+		border: 1px solid #ccc;
+		height: var(--card-height);
+		padding: var(--card-gap);
+		text-align: center;
+		width: var(--card-width);
+	}
+
+	[data-slot]:nth-child(8n + 2),	/** @note divide fist col */
+	[data-slot]:nth-child(8n + 5),	/** @note divide middle col */
+	[data-slot]:nth-child(8n + 8) /** @note divide last col */ {
+		margin-left: var(--card-gap);
+	}
+
+	/** @note divide rows */
+	[data-slot]:nth-child(n + 17):nth-child(-n + 24) {
+		margin-top: var(--card-gap);
+	}
+
+	[data-stack]:not([data-stack='0']) {
+		background: var(--card-back);
+	}
+}
