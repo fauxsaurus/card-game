@@ -7,19 +7,18 @@ STATE
 	add history of moves (super important for analyzing AI matches)
 UI
 	add deck selection
-	add layout
 `
 export const Todo = () => {
 	const [show, setShow] = useState(true)
 
 	return (
 		show && (
-			<>
+			<section style={{outline: '1px solid #000'}}>
 				<header>
 					To Do: <button onClick={() => setShow(false)}>Hide</button>
 				</header>
 				<pre style={{tabSize: 4}}>{todo}</pre>
-			</>
+			</section>
 		)
 	)
 }

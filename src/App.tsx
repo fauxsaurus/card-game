@@ -1,12 +1,33 @@
-import {useState} from 'react'
-import './App.css'
+import {produce} from 'immer'
+import {useReducer} from 'react'
+import {CARD_LIST, createState, setupAttackersDraw, shuffle, type IAction, type IState} from './lib'
 import {Todo} from './todo'
-import {CARD_LIST, createState} from './lib'
+
+import './App.css'
+
+const immerReducer = produce((state: IState, action: IAction) => {
+	switch (action.type) {
+		case 'shuffle':
+			shuffle(state)
+			break
+
+		case 'setup-attackers-draw':
+			setupAttackersDraw(state)
+			break
+
+		default:
+			console.log(action)
+	}
+
+	state.history.push(action)
+
+	return state
+})
 
 function App() {
 	const deck = Object.keys(CARD_LIST)
 
-	const [state, setState] = useState(createState(deck, deck))
+	const [state, setState] = useReducer(immerReducer, createState(deck, deck))
 
 	const yourDeckSize = state.players[0].deck.length
 	const foeDeckSize = state.players[1].deck.length
@@ -148,6 +169,18 @@ function App() {
 				</div>
 			</div>
 			<div data-slot="your-hand"></div>
+			{!state.history.length && (
+				<button onClick={() => setState({type: 'shuffle'})}>Shuffle Decks</button>
+			)}
+			{state.history.length === 1 && (
+				<button onClick={() => setState({type: 'setup-attackers-draw'})}>
+					Draw Cards for Attacker Setup
+				</button>
+			)}
+			<output>
+				<header>State:</header>
+				<pre>{JSON.stringify(state, null, 4)}</pre>
+			</output>
 		</>
 	)
 }

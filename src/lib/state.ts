@@ -1,3 +1,4 @@
+import type {IAction} from './actions'
 import type {ICardNumber} from './CARD_LIST'
 
 type IInt = number
@@ -18,6 +19,7 @@ type IPlayerState = {
 export type IState = {
 	cards: Record<IInt, {id: IInt; cardNumber: ICardNumber}>
 	players: [IPlayerState, IPlayerState]
+	history: IAction[]
 }
 
 export const createState = (cardsInDeckP1: ICardNumber[], cardsInDeckP2: ICardNumber[]): IState => {
@@ -42,5 +44,6 @@ export const createState = (cardsInDeckP1: ICardNumber[], cardsInDeckP2: ICardNu
 			Object.assign({}, basePlayerState, {deck: p1Deck}),
 			Object.assign({}, basePlayerState, {deck: p2Deck}),
 		],
+		history: [],
 	}
 }
