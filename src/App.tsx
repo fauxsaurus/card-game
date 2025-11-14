@@ -1,5 +1,5 @@
 import {produce} from 'immer'
-import {useReducer} from 'react'
+import {useReducer, useState} from 'react'
 import {
 	CARD_LIST,
 	CardSlot,
@@ -49,6 +49,16 @@ const stringifyState = <T,>(obj: T, space = 4) => {
 	)
 }
 
+const Card = ({number}: {number: ICard['cardNumber']}) => {
+	const card = CARD_LIST[number]
+
+	return (
+		<>
+			({card.cardNumber}) {card.pow}
+		</>
+	)
+}
+
 const immerReducer = produce((state: IState, action: IAction) => {
 	switch (action.type) {
 		case 'shuffle':
@@ -72,15 +82,19 @@ function App() {
 	const deck = Object.keys(CARD_LIST)
 
 	const [state, setState] = useReducer(immerReducer, createState(deck, deck))
-
-	const yourDeckSize = state.players[0].deck.length
-	const foeDeckSize = state.players[1].deck.length
+	const [tmpSetupPlacementState, setSetupPlacementState] = useState<
+		IState['cards'][number]['id'][]
+	>([])
 
 	const yourAttackers = state.players[0].attackers
 	const yourDefenders = state.players[0].defenders
 
 	const foeAttackers = state.players[1].attackers
 	const foeDefenders = state.players[1].defenders
+
+	const lastAction = state.history.slice(-1)[0]?.['type'] || 'none'
+
+	const shouldPlaceAttackers = lastAction === 'setup-attackers-draw'
 
 	return (
 		<section data-component="table">
@@ -212,25 +226,48 @@ function App() {
 			</div>
 			<div data-slot="your-hand">
 				{state.players[0].hand.map((cardId, i) => {
-					const card = CARD_LIST[state.cards[cardId].cardNumber]
+					const selectedPlacement = tmpSetupPlacementState.includes(cardId)
+					const selectable = shouldPlaceAttackers && !selectedPlacement
+
+					const action = shouldPlaceAttackers
+						? () => {
+								setSetupPlacementState(tmpState =>
+									selectedPlacement
+										? tmpState.filter(aCardId => aCardId !== cardId)
+										: tmpState.concat([cardId])
+								)
+						  }
+						: undefined
 
 					return (
-						<div data-slot={`your-hand-${i}`} key={cardId}>
-							({card.cardNumber}) {card.pow}
+						<div
+							data-selectable={selectable}
+							data-selected-placement={selectedPlacement}
+							data-slot={`your-hand-${i}`}
+							key={cardId}
+							onClick={() => action?.()}
+						>
+							<Card number={state.cards[cardId].cardNumber} />
 						</div>
 					)
 				})}
 			</div>
-			{!state.history.length && (
-				<button onClick={() => setState({type: 'shuffle'})}>Shuffle Decks</button>
+			{lastAction === 'none' && (
+				<button data-next-action="true" onClick={() => setState({type: 'shuffle'})}>
+					Shuffle Decks
+				</button>
 			)}
-			{state.history.length === 1 && (
-				<button onClick={() => setState({type: 'setup-attackers-draw'})}>
+			{lastAction === 'shuffle' && (
+				<button
+					data-next-action="true"
+					onClick={() => setState({type: 'setup-attackers-draw'})}
+				>
 					Draw Cards for Attacker Setup
 				</button>
 			)}
+			{shouldPlaceAttackers && 'Place Attackers'}
 			<output>
-				<header>State:</header>
+				<header>Debug State:</header>
 				<pre>{stringifyState(state)}</pre>
 			</output>
 		</section>

@@ -7,6 +7,9 @@ STATE
 	add history of moves (super important for analyzing AI matches)
 UI
 	add deck selection
+	<CardSlot />
+		show face up cards
+		show the stack counter in the corner
 `
 export const Todo = () => {
 	const [show, setShow] = useState(true)

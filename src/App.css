@@ -1,3 +1,12 @@
+@keyframes pulse-glow {
+	from {
+		box-shadow: 0 0 10px 5px rgba(0, 255, 255, 0.7); /* Initial glow (cyan) */
+	}
+	to {
+		box-shadow: 0 0 30px 15px rgba(0, 255, 255, 1); /* Expanded, brighter glow */
+	}
+}
+
 [data-component='table'] {
 	--base-unit: 1.5rem;
 
@@ -37,6 +46,18 @@
 	[data-slot='foes-hand'] [data-slot],
 	[data-stack]:not([data-stack='0']) {
 		background: var(--card-back);
+	}
+
+	[data-next-action='true'],
+	[data-selectable='true'] {
+		animation: pulse-glow 1.5s infinite alternate; /* Animates for 1.5s, repeats infinitely, alternates direction */
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
+	[data-selected-placement='true'] {
+		box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.7); /* Initial glow (cyan) */
 	}
 }
 
