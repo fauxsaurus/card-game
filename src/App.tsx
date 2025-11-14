@@ -1,6 +1,15 @@
 import {produce} from 'immer'
 import {useReducer} from 'react'
-import {CARD_LIST, createState, setupAttackersDraw, shuffle, type IAction, type IState} from './lib'
+import {
+	CARD_LIST,
+	CardSlot,
+	createState,
+	setupAttackersDraw,
+	shuffle,
+	type IAction,
+	type ICard,
+	type IState,
+} from './lib'
 import {Todo} from './todo'
 
 import './App.css'
@@ -82,131 +91,124 @@ function App() {
 				))}
 			</div>
 			<div data-component="board">
-				<div data-slot="foes-deck" data-stack={foeDeckSize}>
-					{foeDeckSize}
-				</div>
-
-				<div data-slot="foes-attacker-5" data-empty={!foeAttackers[5]}>
-					A
-				</div>
-				<div data-slot="foes-attacker-4" data-empty={!foeAttackers[4]}>
-					T
-				</div>
-				<div data-slot="foes-attacker-3" data-empty={!foeAttackers[3]}>
-					K
-				</div>
-
-				<div data-slot="foes-defender-5" data-empty={!foeDefenders[5]}>
-					D
-				</div>
-				<div data-slot="foes-defender-4" data-empty={!foeDefenders[4]}>
-					E
-				</div>
-				<div data-slot="foes-defender-3" data-empty={!foeDefenders[3]}>
-					F
-				</div>
-
+				<CardSlot
+					cards={state.players[1].deck}
+					facedown={true}
+					label="deck"
+					name="foes-deck"
+				/>
+				<CardSlot card={foeAttackers[5]} label="A" name="foes-attacker-5" />
+				<CardSlot card={foeAttackers[4]} label="T" name="foes-attacker-4" />
+				<CardSlot card={foeAttackers[3]} label="K" name="foes-attacker-3" />
+				<CardSlot
+					card={foeDefenders[5]?.[0]}
+					data-facedown={foeDefenders[5]?.[1]}
+					label="D"
+					name="foes-defender-5"
+				/>
+				<CardSlot
+					card={foeDefenders[4]?.[0]}
+					data-facedown={foeDefenders[4]?.[1]}
+					label="E"
+					name="foes-defender-4"
+				/>
+				<CardSlot
+					card={foeDefenders[3]?.[0]}
+					data-facedown={foeDefenders[3]?.[1]}
+					label="F"
+					name="foes-defender-3"
+				/>
 				<div data-slot="empty"></div>
 				{/* new row */}
-				<div
-					className="long-text"
-					data-slot="foes-discard"
-					data-stack={state.players[1].discard.length}
-				>
-					Discard
-				</div>
-
-				<div data-slot="foes-attacker-2" data-empty={!foeAttackers[2]}>
-					A
-				</div>
-				<div data-slot="foes-attacker-1" data-empty={!foeAttackers[1]}>
-					T
-				</div>
-				<div data-slot="foes-attacker-0" data-empty={!foeAttackers[0]}>
-					K
-				</div>
-
-				<div data-slot="foes-defender-2" data-empty={!foeDefenders[2]}>
-					D
-				</div>
-				<div data-slot="foes-defender-1" data-empty={!foeDefenders[1]}>
-					E
-				</div>
-				<div data-slot="foes-defender-0" data-empty={!foeDefenders[0]}>
-					F
-				</div>
-
-				<div
-					className="long-text"
-					data-slot="foes-captives"
-					data-stack={state.players[1].captives.length}
-				>
-					Captives
-				</div>
-
+				<CardSlot cards={state.players[1].discard} label="Discard" name="foes-discard" />
+				<CardSlot card={foeAttackers[2]} label="A" name="foes-attacker-2" />
+				<CardSlot card={foeAttackers[1]} label="T" name="foes-attacker-1" />
+				<CardSlot card={foeAttackers[0]} label="K" name="foes-attacker-0" />
+				<CardSlot
+					card={foeDefenders[2]?.[0]}
+					data-facedown={foeDefenders[2]?.[1]}
+					label="D"
+					name="foes-defender-2"
+				/>
+				<CardSlot
+					card={foeDefenders[1]?.[0]}
+					data-facedown={foeDefenders[1]?.[1]}
+					label="E"
+					name="foes-defender-1"
+				/>
+				<CardSlot
+					card={foeDefenders[0]?.[0]}
+					data-facedown={foeDefenders[0]?.[1]}
+					label="F"
+					name="foes-defender-0"
+				/>
+				<CardSlot cards={state.players[1].captives} label="Captives" name="foes-captives" />
 				{/* dividing line */}
-
-				<div
-					className="long-text"
-					data-slot="your-captives"
-					data-stack={state.players[0].captives.length}
-				>
-					Captives
-				</div>
-				<div data-slot="your-defender-0" data-empty={!yourDefenders[0]}>
-					D
-				</div>
-				<div data-slot="your-defender-1" data-empty={!yourDefenders[1]}>
-					E
-				</div>
-				<div data-slot="your-defender-2" data-empty={!yourDefenders[2]}>
-					F
-				</div>
-
-				<div data-slot="your-attacker-0" data-empty={!yourAttackers[0]}>
-					A
-				</div>
-				<div data-slot="your-attacker-1" data-empty={!yourAttackers[1]}>
-					T
-				</div>
-				<div data-slot="your-attacker-2" data-empty={!yourAttackers[2]}>
-					K
-				</div>
-
-				<div
-					className="long-text"
-					data-slot="your-discard"
-					data-stack={state.players[0].discard.length}
-				>
-					Discard
-				</div>
-
+				<CardSlot cards={state.players[0].captives} label="Captives" name="your-captives" />
+				<CardSlot
+					card={yourDefenders[0]?.[0]}
+					data-facedown={yourDefenders[0]?.[1]}
+					label="D"
+					name="your-defender-0"
+				/>
+				<CardSlot
+					card={yourDefenders[1]?.[0]}
+					data-facedown={yourDefenders[1]?.[1]}
+					label="E"
+					name="your-defender-1"
+				/>
+				<CardSlot
+					card={yourDefenders[2]?.[0]}
+					data-facedown={yourDefenders[2]?.[1]}
+					label="F"
+					name="your-defender-2"
+				/>
+				<CardSlot
+					card={yourAttackers[0] || tmpSetupPlacementState[0]}
+					label="A"
+					name="your-attacker-0"
+				/>
+				<CardSlot
+					card={yourAttackers[1] || tmpSetupPlacementState[1]}
+					label="T"
+					name="your-attacker-1"
+				/>
+				<CardSlot
+					card={yourAttackers[2] || tmpSetupPlacementState[2]}
+					label="K"
+					name="your-attacker-2"
+				/>
+				<CardSlot cards={state.players[0].discard} label="Discard" name="your-discard" />
 				{/* new row */}
 				<div data-slot="empty"></div>
 
-				<div data-slot="your-defender-3" data-empty={!yourDefenders[3]}>
-					D
-				</div>
-				<div data-slot="your-defender-4" data-empty={!yourDefenders[4]}>
-					E
-				</div>
-				<div data-slot="your-defender-5" data-empty={!yourDefenders[5]}>
-					F
-				</div>
-
-				<div data-slot="your-attacker-3" data-empty={!yourAttackers[3]}>
-					A
-				</div>
-				<div data-slot="your-attacker-4" data-empty={!yourAttackers[4]}>
-					T
-				</div>
-				<div data-slot="your-attacker-5" data-empty={!yourAttackers[5]}>
-					K
-				</div>
-
-				<div data-slot="your-deck" data-stack={yourDeckSize}>
-					{yourDeckSize}
-				</div>
+				<CardSlot
+					card={yourDefenders[3]?.[0]}
+					data-facedown={yourDefenders[3]?.[1]}
+					label="D"
+					name="your-defender-3"
+				/>
+				<CardSlot
+					card={yourDefenders[4]?.[0]}
+					data-facedown={yourDefenders[4]?.[1]}
+					label="E"
+					name="your-defender-5"
+				/>
+				<CardSlot
+					card={yourDefenders[5]?.[0]}
+					data-facedown={yourDefenders[5]?.[1]}
+					label="F"
+					name="your-defender-5"
+				/>
+				<CardSlot card={yourAttackers[3]} label="A" name="your-attacker-3" />
+				<CardSlot card={yourAttackers[4]} label="T" name="your-attacker-4" />
+				<CardSlot card={yourAttackers[5]} label="K" name="your-attacker-5" />
+				<CardSlot
+					cards={state.players[0].deck}
+					facedown={true}
+					label="deck"
+					name="your-deck"
+				/>
 			</div>
 			<div data-slot="your-hand">
 				{state.players[0].hand.map((cardId, i) => {
