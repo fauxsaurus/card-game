@@ -52,7 +52,7 @@ const stringifyState = <T,>(obj: T, space = 4) => {
 	)
 }
 
-const immerReducer = produce((state: IState, action: IAction) => {
+const reducer = (state: IState, action: IAction) => {
 	switch (action.type) {
 		case 'shuffle':
 			shuffle(state)
@@ -73,7 +73,9 @@ const immerReducer = produce((state: IState, action: IAction) => {
 	state.history.push(action)
 
 	return state
-})
+}
+
+const immerReducer = produce(reducer)
 
 function App() {
 	const deck = Object.keys(CARD_LIST)
