@@ -1,5 +1,6 @@
 type IInt = number
-type IProps = {card?: IInt; cards?: IInt[]; facedown?: boolean; name: string; label: string}
+type IProps = {card?: IInt; cards?: IInt[]; facedown?: boolean; name: string; label?: string}
+
 export const CardSlot = ({facedown, label, ...props}: IProps) => {
 	const cards = props.cards ?? (props.card !== undefined ? [props.card] : [])
 
@@ -8,7 +9,7 @@ export const CardSlot = ({facedown, label, ...props}: IProps) => {
 
 	return (
 		<div
-			className={label.length > 4 ? 'long-text' : undefined}
+			className={(label?.length ?? 0) > 4 ? 'long-text' : undefined}
 			data-empty={!cards.length}
 			data-facedown={cards.length && facedown}
 			data-slot={props.name}

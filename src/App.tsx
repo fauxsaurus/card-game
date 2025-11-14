@@ -118,7 +118,7 @@ function App() {
 					label="F"
 					name="foes-defender-3"
 				/>
-				<div data-slot="empty"></div>
+				<CardSlot name="foes-empty-slot" />
 				{/* new row */}
 				<CardSlot cards={state.players[1].discard} label="Discard" name="foes-discard" />
 				<CardSlot card={foeAttackers[2]} label="A" name="foes-attacker-2" />
@@ -180,7 +180,7 @@ function App() {
 				/>
 				<CardSlot cards={state.players[0].discard} label="Discard" name="your-discard" />
 				{/* new row */}
-				<div data-slot="empty"></div>
+				<CardSlot name="your-empty-slot" />
 
 				<CardSlot
 					card={yourDefenders[3]?.[0]}
