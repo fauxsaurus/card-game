@@ -83,7 +83,7 @@ function App() {
 
 	const [state, setState] = useReducer(immerReducer, createState(deck, deck))
 	const [tmpSetupPlacementState, setSetupPlacementState] = useState<
-		IState['cards'][number]['id'][]
+		IState['cardList'][number]['id'][]
 	>([])
 
 	const yourAttackers = state.players[0].attackers
@@ -247,7 +247,7 @@ function App() {
 							key={cardId}
 							onClick={() => action?.()}
 						>
-							<Card number={state.cards[cardId].cardNumber} />
+							<CardFace number={state.cardList[cardId].cardNumber} />
 						</div>
 					)
 				})}

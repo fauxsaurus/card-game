@@ -17,20 +17,20 @@ type IPlayerState = {
 }
 
 export type IState = {
-	cards: Record<IInt, {id: IInt; cardNumber: ICardNumber}>
+	cardList: Record<IInt, {id: IInt; cardNumber: ICardNumber}>
 	players: [IPlayerState, IPlayerState]
 	history: IAction[]
 }
 
 export const createState = (cardsInDeckP1: ICardNumber[], cardsInDeckP2: ICardNumber[]): IState => {
-	const cards: IState['cards'] = cardsInDeckP1
+	const cards: IState['cardList'] = cardsInDeckP1
 		.concat(cardsInDeckP2)
-		.map((cardNumber, id) => ({cardNumber, id}))
+		.map((cardNumber, id) => ({cardNumber, id: id + 1}))
 		.reduce((obj, value) => Object.assign(obj, {[value.id]: value}), {})
 
 	const p1Deck = Array(cardsInDeckP1.length)
-		.fill(0)
-		.map((_, id) => id)
+		.fill(1)
+		.map((minId, id) => minId + id)
 
 	const p2Deck = Array(cardsInDeckP2.length)
 		.fill(p1Deck.length)
@@ -39,7 +39,7 @@ export const createState = (cardsInDeckP1: ICardNumber[], cardsInDeckP2: ICardNu
 	const basePlayerState = {attackers: {}, defenders: {}, captives: [], discard: [], hand: []}
 
 	return {
-		cards,
+		cardList: cards,
 		players: [
 			Object.assign({}, basePlayerState, {deck: p1Deck}),
 			Object.assign({}, basePlayerState, {deck: p2Deck}),
