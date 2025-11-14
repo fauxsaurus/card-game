@@ -348,6 +348,7 @@ function App() {
 					)
 				})}
 			</div>
+			{/* @ts-expect-error TypeScript's less-than-perfect type inference leads to a lack of overlap with 'none' (i.e., Check the variable declaration, 'none' is a perfectly acceptable value.) */}
 			{lastAction === 'none' && (
 				<button data-next-action="true" onClick={() => setState({type: 'shuffle'})}>
 					Shuffle Decks
