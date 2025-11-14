@@ -48,6 +48,7 @@
 		background: var(--card-back);
 	}
 
+	/* MOVE OPTIONS */
 	[data-next-action='true'],
 	[data-selectable='true'] {
 		animation: pulse-glow 1.5s infinite alternate; /* Animates for 1.5s, repeats infinitely, alternates direction */
@@ -58,6 +59,10 @@
 	}
 	[data-selected-placement='true'] {
 		box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.7); /* Initial glow (cyan) */
+	}
+
+	[data-tentative-move='true'] .card-face {
+		opacity: 0.75;
 	}
 }
 
