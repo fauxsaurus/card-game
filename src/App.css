@@ -1,42 +1,97 @@
-#root {
-	max-width: 1280px;
-	margin: 0 auto;
-	padding: 2rem;
-	text-align: center;
-}
-
-.logo {
-	height: 6em;
-	padding: 1.5em;
-	will-change: filter;
-	transition: filter 300ms;
-}
-.logo:hover {
-	filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-	filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
+@keyframes pulse-glow {
 	from {
-		transform: rotate(0deg);
+		box-shadow: 0 0 10px 5px rgba(0, 255, 255, 0.7); /* Initial glow (cyan) */
 	}
 	to {
-		transform: rotate(360deg);
+		box-shadow: 0 0 30px 15px rgba(0, 255, 255, 1); /* Expanded, brighter glow */
 	}
 }
 
-@media (prefers-reduced-motion: no-preference) {
-	a:nth-of-type(2) .logo {
-		animation: logo-spin infinite 20s linear;
+[data-component='table'] {
+	--base-unit: 1.5rem;
+
+	--card-gap: calc(var(--base-unit) * 0.25);
+	--card-height: calc(var(--base-unit) * 3.5);
+	--card-width: calc(var(--base-unit) * 2.5);
+
+	--card-back: #9cf;
+
+	display: flex;
+	flex-direction: column;
+	font-family: Arial, Helvetica, sans-serif;
+	gap: calc(var(--card-gap) * 2);
+	/** 8 cards + 7 gaps in between + 3 double-wide gaps */
+	width: calc((var(--card-width) * 8) + (var(--card-gap) * 10));
+
+	[data-slot]:not([data-slot$='hand']) {
+		align-items: center;
+		background-color: #f0f0f0;
+		border: 1px solid #ccc;
+		display: flex;
+		height: var(--card-height);
+		justify-content: center;
+		padding: var(--card-gap);
+		text-align: center;
+		user-select: none;
+		width: var(--card-width);
+	}
+
+	[data-slot$='hand'] {
+		display: flex;
+		justify-content: center;
+		gap: var(--card-gap);
+	}
+
+	/** FACEDOWN CARDS */
+	[data-slot='foes-hand'] [data-slot],
+	[data-stack]:not([data-stack='0']) {
+		background: var(--card-back);
+	}
+
+	/* MOVE OPTIONS */
+	[data-next-action='true'],
+	[data-selectable='true'] {
+		animation: pulse-glow 1.5s infinite alternate; /* Animates for 1.5s, repeats infinitely, alternates direction */
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
+	[data-selected-placement='true'] {
+		box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.7); /* Initial glow (cyan) */
+	}
+
+	[data-tentative-move='true'] .card-face {
+		opacity: 0.75;
 	}
 }
 
-.card {
-	padding: 2em;
-}
+[data-component='board'] {
+	display: grid;
+	gap: var(--card-gap);
+	grid-template-columns: repeat(8, 1fr);
+	grid-template-rows: repeat(4, auto);
 
-.read-the-docs {
-	color: #888;
+	/** GRID GAPS (for +readability) */
+
+	/** @note divide rows */
+	[data-slot]:nth-child(n + 17):nth-child(-n + 24) {
+		margin-top: var(--card-gap);
+	}
+
+	[data-slot]:nth-child(8n + 2),	/** @note divide fist col */
+	[data-slot]:nth-child(8n + 5),	/** @note divide middle col */
+	[data-slot]:nth-child(8n + 8) /** @note divide last col */ {
+		margin-left: var(--card-gap);
+	}
+
+	/** CARD SLOT LABELS */
+	[data-empty='true'],
+	[data-stack='0'] {
+		color: #0006;
+	}
+
+	.long-text {
+		font-size: 0.8rem;
+	}
 }
