@@ -7,6 +7,10 @@ import {
 	createState,
 	setupAttackersDraw,
 	setupAttackersPlace,
+	setupDefendersBackDraw,
+	setupDefendersBackPlace,
+	setupDefendersFrontDraw,
+	setupDefendersFrontPlace,
 	shuffle,
 	type IAction,
 	type IState,
@@ -66,6 +70,22 @@ const reducer = (state: IState, action: IAction) => {
 			setupAttackersPlace(state, action)
 			break
 
+		case 'setup-defenders-front-draw':
+			setupDefendersFrontDraw(state)
+			break
+
+		case 'setup-defenders-front-place':
+			setupDefendersFrontPlace(state, action)
+			break
+
+		case 'setup-defenders-back-draw':
+			setupDefendersBackDraw(state)
+			break
+
+		case 'setup-defenders-back-place':
+			setupDefendersBackPlace(state, action)
+			break
+
 		default:
 			console.log(action)
 	}
@@ -94,20 +114,47 @@ function App() {
 	const lastAction = state.history.slice(-1)[0]?.['type'] || 'none'
 
 	const shouldPlaceAttackers = lastAction === 'setup-attackers-draw'
+	const shouldPlaceDefendersFront = lastAction === 'setup-defenders-front-draw'
+	const shouldPlaceDefendersBack = lastAction === 'setup-defenders-back-draw'
 
 	// place cards (in setup phase)
 	useEffect(() => {
 		if (tmpSetupPlacementState.length !== 3) return
 
 		setSetupPlacementState([])
-		setState({
-			type: 'setup-attackers-place',
-			order: [
-				tmpSetupPlacementState as [IInt, IInt, IInt],
-				state.players[1].hand as [IInt, IInt, IInt],
-			],
-		})
-	}, [state.players, tmpSetupPlacementState])
+		if (shouldPlaceAttackers)
+			return setState({
+				type: 'setup-attackers-place',
+				order: [
+					tmpSetupPlacementState as [IInt, IInt, IInt],
+					state.players[1].hand as [IInt, IInt, IInt],
+				],
+			})
+
+		if (shouldPlaceDefendersFront)
+			return setState({
+				type: 'setup-defenders-front-place',
+				order: [
+					tmpSetupPlacementState as [IInt, IInt, IInt],
+					state.players[1].hand as [IInt, IInt, IInt],
+				],
+			})
+
+		if (shouldPlaceDefendersBack)
+			return setState({
+				type: 'setup-defenders-back-place',
+				order: [
+					tmpSetupPlacementState as [IInt, IInt, IInt],
+					state.players[1].hand as [IInt, IInt, IInt],
+				],
+			})
+	}, [
+		shouldPlaceAttackers,
+		shouldPlaceDefendersBack,
+		shouldPlaceDefendersFront,
+		state.players,
+		tmpSetupPlacementState,
+	])
 
 	return (
 		<section data-component="table">
@@ -146,21 +193,21 @@ function App() {
 				<CardSlot
 					cardList={state.cardList}
 					card={foeDefenders[5]?.[0]}
-					data-facedown={foeDefenders[5]?.[1]}
+					facedown={!!foeDefenders[5]?.[1]}
 					label="D"
 					name="foes-defender-5"
 				/>
 				<CardSlot
 					cardList={state.cardList}
 					card={foeDefenders[4]?.[0]}
-					data-facedown={foeDefenders[4]?.[1]}
+					facedown={!!foeDefenders[4]?.[1]}
 					label="E"
 					name="foes-defender-4"
 				/>
 				<CardSlot
 					cardList={state.cardList}
 					card={foeDefenders[3]?.[0]}
-					data-facedown={foeDefenders[3]?.[1]}
+					facedown={!!foeDefenders[3]?.[1]}
 					label="F"
 					name="foes-defender-3"
 				/>
@@ -193,21 +240,21 @@ function App() {
 				<CardSlot
 					cardList={state.cardList}
 					card={foeDefenders[2]?.[0]}
-					data-facedown={foeDefenders[2]?.[1]}
+					facedown={!!foeDefenders[2]?.[1]}
 					label="D"
 					name="foes-defender-2"
 				/>
 				<CardSlot
 					cardList={state.cardList}
 					card={foeDefenders[1]?.[0]}
-					data-facedown={foeDefenders[1]?.[1]}
+					facedown={!!foeDefenders[1]?.[1]}
 					label="E"
 					name="foes-defender-1"
 				/>
 				<CardSlot
 					cardList={state.cardList}
 					card={foeDefenders[0]?.[0]}
-					data-facedown={foeDefenders[0]?.[1]}
+					facedown={!!foeDefenders[0]?.[1]}
 					label="F"
 					name="foes-defender-0"
 				/>
@@ -226,45 +273,72 @@ function App() {
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourDefenders[0]?.[0]}
-					data-facedown={yourDefenders[0]?.[1]}
+					card={
+						yourDefenders[0]?.[0] ||
+						(shouldPlaceDefendersFront ? tmpSetupPlacementState[0] : undefined)
+					}
+					facedown={!!yourDefenders[0]?.[1]}
 					label="D"
 					name="your-defender-0"
+					tentativeMove={
+						!!(shouldPlaceDefendersFront ? tmpSetupPlacementState[0] : undefined)
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourDefenders[1]?.[0]}
-					data-facedown={yourDefenders[1]?.[1]}
+					card={
+						yourDefenders[1]?.[0] ||
+						(shouldPlaceDefendersFront ? tmpSetupPlacementState[1] : undefined)
+					}
+					facedown={!!yourDefenders[1]?.[1]}
 					label="E"
 					name="your-defender-1"
+					tentativeMove={
+						!!(shouldPlaceDefendersFront ? tmpSetupPlacementState[1] : undefined)
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourDefenders[2]?.[0]}
-					data-facedown={yourDefenders[2]?.[1]}
+					card={
+						yourDefenders[2]?.[0] ||
+						(shouldPlaceDefendersFront ? tmpSetupPlacementState[2] : undefined)
+					}
+					facedown={!!yourDefenders[2]?.[1]}
 					label="F"
 					name="your-defender-2"
+					tentativeMove={
+						!!(shouldPlaceDefendersFront ? tmpSetupPlacementState[2] : undefined)
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourAttackers[0] || tmpSetupPlacementState[0]}
+					card={
+						yourAttackers[0] ||
+						(shouldPlaceAttackers ? tmpSetupPlacementState[0] : undefined)
+					}
 					label="A"
 					name="your-attacker-0"
-					tentativeMove={!!tmpSetupPlacementState[0]}
+					tentativeMove={!!(shouldPlaceAttackers ? tmpSetupPlacementState[0] : undefined)}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourAttackers[1] || tmpSetupPlacementState[1]}
+					card={
+						yourAttackers[1] ||
+						(shouldPlaceAttackers ? tmpSetupPlacementState[1] : undefined)
+					}
 					label="T"
 					name="your-attacker-1"
-					tentativeMove={!!tmpSetupPlacementState[1]}
+					tentativeMove={!!(shouldPlaceAttackers ? tmpSetupPlacementState[1] : undefined)}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourAttackers[2] || tmpSetupPlacementState[2]}
+					card={
+						yourAttackers[2] ||
+						(shouldPlaceAttackers ? tmpSetupPlacementState[2] : undefined)
+					}
 					label="K"
 					name="your-attacker-2"
-					tentativeMove={!!tmpSetupPlacementState[2]}
+					tentativeMove={!!(shouldPlaceAttackers ? tmpSetupPlacementState[2] : undefined)}
 				/>
 				<CardSlot
 					cardList={state.cardList}
@@ -278,21 +352,21 @@ function App() {
 				<CardSlot
 					cardList={state.cardList}
 					card={yourDefenders[3]?.[0]}
-					data-facedown={yourDefenders[3]?.[1]}
+					facedown={!!yourDefenders[3]?.[1]}
 					label="D"
 					name="your-defender-3"
 				/>
 				<CardSlot
 					cardList={state.cardList}
 					card={yourDefenders[4]?.[0]}
-					data-facedown={yourDefenders[4]?.[1]}
+					facedown={!!yourDefenders[4]?.[1]}
 					label="E"
 					name="your-defender-5"
 				/>
 				<CardSlot
 					cardList={state.cardList}
 					card={yourDefenders[5]?.[0]}
-					data-facedown={yourDefenders[5]?.[1]}
+					facedown={!!yourDefenders[5]?.[1]}
 					label="F"
 					name="your-defender-5"
 				/>
@@ -325,17 +399,24 @@ function App() {
 			<div data-slot="your-hand">
 				{state.players[0].hand.map((cardId, i) => {
 					const selectedPlacement = tmpSetupPlacementState.includes(cardId)
-					const selectable = shouldPlaceAttackers && !selectedPlacement
+					const selectable =
+						(shouldPlaceAttackers ||
+							shouldPlaceDefendersFront ||
+							shouldPlaceDefendersBack) &&
+						!selectedPlacement
 
-					const action = shouldPlaceAttackers
-						? () => {
-								setSetupPlacementState(tmpState =>
-									selectedPlacement
-										? tmpState.filter(aCardId => aCardId !== cardId)
-										: tmpState.concat([cardId])
-								)
-						  }
-						: undefined
+					const action =
+						shouldPlaceAttackers ||
+						shouldPlaceDefendersFront ||
+						shouldPlaceDefendersBack
+							? () => {
+									setSetupPlacementState(tmpState =>
+										selectedPlacement
+											? tmpState.filter(aCardId => aCardId !== cardId)
+											: tmpState.concat([cardId])
+									)
+							  }
+							: undefined
 
 					return (
 						<div
@@ -351,20 +432,36 @@ function App() {
 				})}
 			</div>
 			{/* @ts-expect-error TypeScript's less-than-perfect type inference leads to a lack of overlap with 'none' (i.e., Check the variable declaration, 'none' is a perfectly acceptable value.) */}
-			{lastAction === 'none' && (
+			{lastAction === 'none' ? (
 				<button data-next-action="true" onClick={() => setState({type: 'shuffle'})}>
 					Shuffle Decks
 				</button>
-			)}
-			{lastAction === 'shuffle' && (
+			) : lastAction === 'shuffle' ? (
 				<button
 					data-next-action="true"
 					onClick={() => setState({type: 'setup-attackers-draw'})}
 				>
 					Draw Cards for Attacker Setup
 				</button>
+			) : shouldPlaceAttackers ? (
+				'Place Attackers'
+			) : lastAction === 'setup-attackers-place' ? (
+				<button
+					data-next-action="true"
+					onClick={() => setState({type: 'setup-defenders-front-draw'})}
+				>
+					Draw Cards for Frontline Defender Setup
+				</button>
+			) : lastAction === 'setup-defenders-front-place' ? (
+				<button
+					data-next-action="true"
+					onClick={() => setState({type: 'setup-defenders-back-draw'})}
+				>
+					Draw Cards for Back line Defender Setup
+				</button>
+			) : (
+				'End of Supported Gameplay'
 			)}
-			{shouldPlaceAttackers && 'Place Attackers'}
 			<output>
 				<header>Debug State:</header>
 				<pre>{stringifyState(state)}</pre>

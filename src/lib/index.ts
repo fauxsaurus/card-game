@@ -5,4 +5,5 @@ export * from './state'
 
 export * from './draw-hand'
 export * from './setup-attackers'
+export * from './setup-defenders'
 export * from './shuffle'
