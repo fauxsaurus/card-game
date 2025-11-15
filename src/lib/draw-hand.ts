@@ -13,4 +13,6 @@ export const drawFullHand = (state: IState) => {
 	return state
 }
 
+export const drawHand = drawFullHand
+
 const splitArrayAt = <T>(i: number, arr: T[]) => [arr.slice(0, i), arr.slice(i)]

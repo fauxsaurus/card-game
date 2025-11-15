@@ -5,6 +5,7 @@ import {
 	CardFace,
 	CardSlot,
 	createState,
+	drawHand,
 	setupAttackersDraw,
 	setupAttackersPlace,
 	setupDefendersBackDraw,
@@ -84,6 +85,9 @@ const reducer = (state: IState, action: IAction) => {
 
 		case 'setup-defenders-back-place':
 			setupDefendersBackPlace(state, action)
+			break
+		case 'setup-draw-hand':
+			drawHand(state)
 			break
 
 		default:
@@ -458,6 +462,10 @@ function App() {
 					onClick={() => setState({type: 'setup-defenders-back-draw'})}
 				>
 					Draw Cards for Back line Defender Setup
+				</button>
+			) : lastAction === 'setup-defenders-back-place' ? (
+				<button data-next-action="true" onClick={() => setState({type: 'setup-draw-hand'})}>
+					Draw Hand
 				</button>
 			) : (
 				'End of Supported Gameplay'
