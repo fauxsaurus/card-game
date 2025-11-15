@@ -23,9 +23,12 @@
 	/** 8 cards + 7 gaps in between + 3 double-wide gaps */
 	width: calc((var(--card-width) * 8) + (var(--card-gap) * 10));
 
+	[data-slot]:not([data-slot$='hand']):not([data-facedown='true']) {
+		background-color: #f0f0f0;
+	}
+
 	[data-slot]:not([data-slot$='hand']) {
 		align-items: center;
-		background-color: #f0f0f0;
 		border: 1px solid #ccc;
 		display: flex;
 		height: var(--card-height);
@@ -44,7 +47,7 @@
 
 	/** FACEDOWN CARDS */
 	[data-slot='foes-hand'] [data-slot],
-	[data-stack]:not([data-stack='0']) {
+	[data-facedown='true'] {
 		background: var(--card-back);
 	}
 

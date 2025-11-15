@@ -23,7 +23,7 @@ export const CardSlot = ({facedown, label, ...props}: IProps) => {
 			className={(label?.length ?? 0) > 4 ? 'long-text' : undefined}
 			data-tentative-move={props.tentativeMove}
 			data-empty={!cards.length}
-			data-facedown={cards.length && facedown}
+			data-facedown={!!cards.length && !!facedown}
 			data-slot={props.name}
 			data-stack={isStack ? cards.length : undefined}
 		>
