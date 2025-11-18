@@ -9,3 +9,4 @@ export type IAction =
 	| {type: 'setup-defenders-back-draw'}
 	| {type: 'setup-defenders-back-place'; order: [[IInt, IInt, IInt], [IInt, IInt, IInt]]}
 	| {type: 'setup-draw-hand'}
+	| {type: 'turn-draw-card'; player: 0 | 1}

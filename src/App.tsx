@@ -5,6 +5,7 @@ import {
 	CardFace,
 	CardSlot,
 	createState,
+	drawCard,
 	drawHand,
 	setupAttackersDraw,
 	setupAttackersPlace,
@@ -88,6 +89,10 @@ const reducer = (state: IState, action: IAction) => {
 			break
 		case 'setup-draw-hand':
 			drawHand(state)
+			break
+
+		case 'turn-draw-card':
+			drawCard(state, action)
 			break
 
 		default:
@@ -466,6 +471,10 @@ function App() {
 			) : lastAction === 'setup-defenders-back-place' ? (
 				<button data-next-action="true" onClick={() => setState({type: 'setup-draw-hand'})}>
 					Draw Hand
+				</button>
+			) : lastAction === 'setup-draw-hand' ? (
+				<button onClick={() => setState({type: 'turn-draw-card', player: 0})}>
+					Draw Card (P1)
 				</button>
 			) : (
 				'End of Supported Gameplay'

@@ -15,4 +15,14 @@ export const drawFullHand = (state: IState) => {
 
 export const drawHand = drawFullHand
 
+export const drawCard = (state: IState, action: {player: 0 | 1}) => {
+	const player = state.players[action.player]
+	const [hand, deck] = splitArrayAt(1, player.deck)
+
+	player.deck = deck
+	player.hand = player.hand.concat(hand)
+
+	return state
+}
+
 const splitArrayAt = <T>(i: number, arr: T[]) => [arr.slice(0, i), arr.slice(i)]
