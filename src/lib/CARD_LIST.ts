@@ -18,7 +18,7 @@ export const FACTIONS = ['PENGUIN', 'BEAR', 'SNOWMEN']
 const penguins =
 	`Caesar	7	7	Inspiring	"+1 pow to cards on this side of the field"	Emperor Penguin with a golden olive leaf crown and toga (yellow to orange gradient).
 Octavian	5	5	Avenger	"+2 atk if Caesar is captured"
-	5	5	Usurper	"+1 pow if Caesar is captured"	King Penguin Mark Anthony
+Mark A.	5	5	Usurper	"+1 pow if Caesar is captured"	King Penguin Mark Anthony
 Brutus	5	5	Backstabber	"+1 pow when attacking a facedown card"	Brutus whistling with a blade tucked behind his back
 Cass	5	5	Egg on	"+1 pow to the card ahead of this one"	Cassius holding up and egg and cheering someone on with a hand to his beak encouraging them
 Aquilifer	4	4	Reclaim Honor	"+1 ATK to all cards when this card is captured."	Macaroni Penguin with a pretentious golden Caesar penguin atop with its wings partially outstretched
