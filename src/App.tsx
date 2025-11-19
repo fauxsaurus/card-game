@@ -102,11 +102,13 @@ const reducer = (state: IState, action: IAction) => {
 	return state
 }
 
-const nextStep = (state: IState): IState['history'][number]['type'] => {
-	const lastAction = state.history.slice(-1)[0]?.type ?? ''
-	if (!lastAction) return 'setup-shuffle'
+type IActionType = IState['history'][number]['type'][]
 
-	if (/^setup-/.test(lastAction)) {
+const getNextActions = (state: IState): IActionType => {
+	const lastActionType = state.history.slice(-1)[0]?.type ?? ''
+	if (!lastActionType) return ['setup-shuffle']
+
+	if (/^setup-/.test(lastActionType)) {
 		const order = [
 			'setup-shuffle',
 			'setup-attackers-draw',
@@ -119,14 +121,44 @@ const nextStep = (state: IState): IState['history'][number]['type'] => {
 			'turn-draw-card',
 		] as const
 
-		return order[order.indexOf(lastAction) + 1]
+		/** @ts-expect-error If the last action is a different type, this logic path will not be gone down due to the if statement. Thus, 1:1 overlap is not necessary. */
+		return [order[order.indexOf(lastActionType) + 1]]
 	}
 
-	return 'turn-draw-card'
+	/** @note implicit if (/^turn-/.test(lastAction)) // since an ^end state would finish the game */
+
+	// <check4victory>
+	const p1CapturedAllyCount = state.players[0].captives.length
+	const p2CapturedAllyCount = state.players[1].captives.length
+
+	const p1Wins = p2CapturedAllyCount === 6
+	const p2Wins = p1CapturedAllyCount === 6
+
+	if (p1Wins && p2Wins) return ['end-draw']
+	if (p1Wins || p2Wins) return ['end-victory']
+	// </check4victory>
+
+	if (lastActionType === 'turn-end') return ['turn-draw-card']
+
+	// <list-options-left>
+	// Who made the last move?
+	/** @ts-expect-error All ^turn actions will have a player prop */
+	const whoseTurn = state.history.slice(-1)[0].player
+
+	// get all actions taken by the player this turn
+	/** @ts-expect-error All ^turn actions will have a player prop */
+	const lastOpponentActionI = state.history.findLastIndex(action => action.player !== whoseTurn)
+	const actionsTakenThisTurn = state.history.slice(lastOpponentActionI + 1).map(({type}) => type)
+
+	// return actions not yet taken
+	return (['turn-play-card', 'turn-activate-ability', 'turn-attack', 'turn-end'] as const).filter(
+		actionType => !actionsTakenThisTurn.includes(actionType)
+	)
 }
 
 const calculateTentativeState = (state: IState, tmpSetupPlacementState: number[]) => {
-	const nextAction = nextStep(state)
+	const nextActions = getNextActions(state)
+	const nextAction = nextActions[0]
 	if (!/^setup(.+)place$/.test(nextAction)) return state
 
 	const copyOfState: IState = JSON.parse(JSON.stringify(state))
@@ -162,7 +194,8 @@ function App() {
 	const foeAttackers = state.players[1].attackers
 	const foeDefenders = state.players[1].defenders
 
-	const nextAction = nextStep(state)
+	const nextActions = getNextActions(state)
+	const nextAction = nextActions[0]
 
 	// place cards (in setup phase)
 	useEffect(() => {
@@ -490,7 +523,7 @@ function App() {
 			)}
 			<output>
 				<header>Debug State:</header>
-				<b>Current Phase: {nextAction}</b>
+				<b>Current Phase: {nextActions.join(',')}</b>
 				<pre>{stringifyState(state)}</pre>
 				<b>Tentative State</b>
 				<pre>{stringifyState(tentativeState)}</pre>

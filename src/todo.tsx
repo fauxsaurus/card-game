@@ -22,7 +22,6 @@ Logic
 	allow dependency injection in the reducer to AI play test different rulesets and examine win rates
 		somehow need to manage the same on card event handlers and effects
 	create a display state (based on intermediate tmp setup state) and have the tentative move attribute be filled by checking for differences with display state and intermediate state to greatly simplify attribute passing to card slots.
-	flesh out nextStep to include more turn information (i.e., whose turn is it, and what options are available to them? reconfigure function into available options)
 	Could/should the player property be dropped from action (i.e., if the player whose turn it is can be calculated programmatically, then such data is unnecessary)
 performance
 	improve tentativeState calculation with immer and/or jotai atoms
@@ -30,6 +29,8 @@ AI
 	allow the AI to strategically place cards in the setup phase
 Licensing
 	determine proper license (potentially dual licensing code and art)
+Gameplay
+	Ensure that hovering over an opponent's facedown card never reveals their ability--or any info about them.
 `
 export const Todo = () => {
 	const [show, setShow] = useState(true)
