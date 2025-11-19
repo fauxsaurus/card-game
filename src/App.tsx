@@ -104,6 +104,29 @@ const reducer = (state: IState, action: IAction) => {
 	return state
 }
 
+const nextStep = (state: IState): IState['history'][number]['type'] => {
+	const lastAction = state.history.slice(-1)[0]?.type ?? ''
+	if (!lastAction) return 'setup-shuffle'
+
+	if (/^setup-/.test(lastAction)) {
+		const order = [
+			'setup-shuffle',
+			'setup-attackers-draw',
+			'setup-attackers-place',
+			'setup-defenders-front-draw',
+			'setup-defenders-front-place',
+			'setup-defenders-back-draw',
+			'setup-defenders-back-place',
+			'setup-draw-hand',
+			'turn-draw-card',
+		] as const
+
+		return order[order.indexOf(lastAction) + 1]
+	}
+
+	return 'turn-draw-card'
+}
+
 const immerReducer = produce(reducer)
 
 function App() {
@@ -122,48 +145,22 @@ function App() {
 
 	const lastAction = state.history.slice(-1)[0]?.['type'] || 'none'
 
-	const shouldPlaceAttackers = lastAction === 'setup-attackers-draw'
-	const shouldPlaceDefendersFront = lastAction === 'setup-defenders-front-draw'
-	const shouldPlaceDefendersBack = lastAction === 'setup-defenders-back-draw'
+	const nextAction = nextStep(state)
+	const shouldPlaceAttackers = nextAction === 'setup-attackers-place'
+	const shouldPlaceDefendersFront = nextAction === 'setup-defenders-front-place'
+	const shouldPlaceDefendersBack = nextAction === 'setup-defenders-back-place'
 
 	// place cards (in setup phase)
 	useEffect(() => {
+		if (!/^setup(.+)place$/.test(nextAction)) return
 		if (tmpSetupPlacementState.length !== 3) return
 
 		setSetupPlacementState([])
-		if (shouldPlaceAttackers)
-			return setState({
-				type: 'setup-attackers-place',
-				order: [
-					tmpSetupPlacementState as [IInt, IInt, IInt],
-					state.players[1].hand as [IInt, IInt, IInt],
-				],
-			})
-
-		if (shouldPlaceDefendersFront)
-			return setState({
-				type: 'setup-defenders-front-place',
-				order: [
-					tmpSetupPlacementState as [IInt, IInt, IInt],
-					state.players[1].hand as [IInt, IInt, IInt],
-				],
-			})
-
-		if (shouldPlaceDefendersBack)
-			return setState({
-				type: 'setup-defenders-back-place',
-				order: [
-					tmpSetupPlacementState as [IInt, IInt, IInt],
-					state.players[1].hand as [IInt, IInt, IInt],
-				],
-			})
-	}, [
-		shouldPlaceAttackers,
-		shouldPlaceDefendersBack,
-		shouldPlaceDefendersFront,
-		state.players,
-		tmpSetupPlacementState,
-	])
+		setState({
+			type: nextAction,
+			order: [tmpSetupPlacementState, state.players[1].hand],
+		} as IAction)
+	}, [nextAction, state.players, tmpSetupPlacementState])
 
 	return (
 		<section data-component="table">
