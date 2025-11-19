@@ -21,8 +21,6 @@ import {Todo} from './todo'
 
 import './App.css'
 
-type IInt = number
-
 const stringifyState = <T,>(obj: T, space = 4) => {
 	const jsonString = JSON.stringify(
 		obj,
@@ -127,6 +125,28 @@ const nextStep = (state: IState): IState['history'][number]['type'] => {
 	return 'turn-draw-card'
 }
 
+const calculateTentativeState = (state: IState, tmpSetupPlacementState: number[]) => {
+	const nextAction = nextStep(state)
+	if (!/^setup(.+)place$/.test(nextAction)) return state
+
+	const copyOfState: IState = JSON.parse(JSON.stringify(state))
+
+	if (nextAction === 'setup-attackers-place')
+		Object.assign(copyOfState.players[0].attackers, tmpSetupPlacementState)
+	else if (nextAction === 'setup-defenders-front-place')
+		Object.assign(
+			copyOfState.players[0].defenders,
+			Object.fromEntries(tmpSetupPlacementState.map((id, i) => [i, [id, 1]]))
+		)
+	else if (nextAction === 'setup-defenders-back-place')
+		Object.assign(
+			copyOfState.players[0].defenders,
+			Object.fromEntries(tmpSetupPlacementState.map((id, i) => [i + 3, [id, 0]]))
+		)
+
+	return copyOfState
+}
+
 const immerReducer = produce(reducer)
 
 function App() {
@@ -136,19 +156,13 @@ function App() {
 	const [tmpSetupPlacementState, setSetupPlacementState] = useState<
 		IState['cardList'][number]['id'][]
 	>([])
+	const tentativeState = calculateTentativeState(state, tmpSetupPlacementState)
 
 	const yourAttackers = state.players[0].attackers
-	const yourDefenders = state.players[0].defenders
-
 	const foeAttackers = state.players[1].attackers
 	const foeDefenders = state.players[1].defenders
 
-	const lastAction = state.history.slice(-1)[0]?.['type'] || 'none'
-
 	const nextAction = nextStep(state)
-	const shouldPlaceAttackers = nextAction === 'setup-attackers-place'
-	const shouldPlaceDefendersFront = nextAction === 'setup-defenders-front-place'
-	const shouldPlaceDefendersBack = nextAction === 'setup-defenders-back-place'
 
 	// place cards (in setup phase)
 	useEffect(() => {
@@ -279,72 +293,63 @@ function App() {
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={
-						yourDefenders[0]?.[0] ||
-						(shouldPlaceDefendersFront ? tmpSetupPlacementState[0] : undefined)
-					}
-					facedown={!!yourDefenders[0]?.[1]}
+					card={tentativeState.players[0].defenders[0]?.[0]}
+					facedown={!!tentativeState.players[0].defenders[0]?.[1]}
 					label="D"
 					name="your-defender-0"
 					tentativeMove={
-						!!(shouldPlaceDefendersFront ? tmpSetupPlacementState[0] : undefined)
+						tentativeState.players[0].defenders[0]?.[0] !==
+						state.players[0].defenders[0]?.[0]
 					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={
-						yourDefenders[1]?.[0] ||
-						(shouldPlaceDefendersFront ? tmpSetupPlacementState[1] : undefined)
-					}
-					facedown={!!yourDefenders[1]?.[1]}
+					card={tentativeState.players[0].defenders[1]?.[0]}
+					facedown={!!tentativeState.players[0].defenders[1]?.[1]}
 					label="E"
 					name="your-defender-1"
 					tentativeMove={
-						!!(shouldPlaceDefendersFront ? tmpSetupPlacementState[1] : undefined)
+						tentativeState.players[0].defenders[1]?.[0] !==
+						state.players[0].defenders[1]?.[0]
 					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={
-						yourDefenders[2]?.[0] ||
-						(shouldPlaceDefendersFront ? tmpSetupPlacementState[2] : undefined)
-					}
-					facedown={!!yourDefenders[2]?.[1]}
+					card={tentativeState.players[0].defenders[2]?.[0]}
+					facedown={!!tentativeState.players[0].defenders[2]?.[1]}
 					label="F"
 					name="your-defender-2"
 					tentativeMove={
-						!!(shouldPlaceDefendersFront ? tmpSetupPlacementState[2] : undefined)
+						tentativeState.players[0].defenders[2]?.[0] !==
+						state.players[0].defenders[2]?.[0]
 					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={
-						yourAttackers[0] ||
-						(shouldPlaceAttackers ? tmpSetupPlacementState[0] : undefined)
-					}
+					card={tentativeState.players[0].attackers[0]}
 					label="A"
 					name="your-attacker-0"
-					tentativeMove={!!(shouldPlaceAttackers ? tmpSetupPlacementState[0] : undefined)}
+					tentativeMove={
+						tentativeState.players[0].attackers[0] !== state.players[0].attackers[0]
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={
-						yourAttackers[1] ||
-						(shouldPlaceAttackers ? tmpSetupPlacementState[1] : undefined)
-					}
+					card={tentativeState.players[0].attackers[1]}
 					label="T"
 					name="your-attacker-1"
-					tentativeMove={!!(shouldPlaceAttackers ? tmpSetupPlacementState[1] : undefined)}
+					tentativeMove={
+						tentativeState.players[0].attackers[1] !== state.players[0].attackers[1]
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={
-						yourAttackers[2] ||
-						(shouldPlaceAttackers ? tmpSetupPlacementState[2] : undefined)
-					}
+					card={tentativeState.players[0].attackers[2]}
 					label="K"
 					name="your-attacker-2"
-					tentativeMove={!!(shouldPlaceAttackers ? tmpSetupPlacementState[2] : undefined)}
+					tentativeMove={
+						tentativeState.players[0].attackers[2] !== state.players[0].attackers[2]
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
@@ -357,24 +362,36 @@ function App() {
 
 				<CardSlot
 					cardList={state.cardList}
-					card={yourDefenders[3]?.[0]}
-					facedown={!!yourDefenders[3]?.[1]}
+					card={tentativeState.players[0].defenders[3]?.[0]}
+					facedown={!!tentativeState.players[0].defenders[3]?.[1]}
 					label="D"
 					name="your-defender-3"
+					tentativeMove={
+						tentativeState.players[0].defenders[3]?.[0] !==
+						state.players[0].defenders[3]?.[0]
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourDefenders[4]?.[0]}
-					facedown={!!yourDefenders[4]?.[1]}
+					card={tentativeState.players[0].defenders[4]?.[0]}
+					facedown={!!tentativeState.players[0].defenders[4]?.[1]}
 					label="E"
-					name="your-defender-5"
+					name="your-defender-4"
+					tentativeMove={
+						tentativeState.players[0].defenders[4]?.[0] !==
+						state.players[0].defenders[4]?.[0]
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={yourDefenders[5]?.[0]}
-					facedown={!!yourDefenders[5]?.[1]}
+					card={tentativeState.players[0].defenders[5]?.[0]}
+					facedown={!!tentativeState.players[0].defenders[5]?.[1]}
 					label="F"
 					name="your-defender-5"
+					tentativeMove={
+						tentativeState.players[0].defenders[5]?.[0] !==
+						state.players[0].defenders[5]?.[0]
+					}
 				/>
 				<CardSlot
 					cardList={state.cardList}
