@@ -10,6 +10,7 @@ type IPlayerState = {
 	attackers: IField<IInt>
 	defenders: IField<[IInt, IIsFaceDown]>
 	// stacks
+	/** @note This represents the number of allies captured (i.e., if it hits 6, that player loses). */
 	captives: IInt[]
 	discard: IInt[]
 	deck: IInt[]

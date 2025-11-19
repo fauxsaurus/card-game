@@ -41,6 +41,7 @@
 
 	[data-slot$='hand'] {
 		display: flex;
+		height: var(--card-height);
 		justify-content: center;
 		gap: var(--card-gap);
 	}
