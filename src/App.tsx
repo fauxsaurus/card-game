@@ -60,7 +60,7 @@ const stringifyState = <T,>(obj: T, space = 4) => {
 
 const reducer = (state: IState, action: IAction) => {
 	switch (action.type) {
-		case 'shuffle':
+		case 'setup-shuffle':
 			shuffle(state)
 			break
 
@@ -442,10 +442,10 @@ function App() {
 			</div>
 			{/* @ts-expect-error TypeScript's less-than-perfect type inference leads to a lack of overlap with 'none' (i.e., Check the variable declaration, 'none' is a perfectly acceptable value.) */}
 			{lastAction === 'none' ? (
-				<button data-next-action="true" onClick={() => setState({type: 'shuffle'})}>
+				<button data-next-action="true" onClick={() => setState({type: 'setup-shuffle'})}>
 					Shuffle Decks
 				</button>
-			) : lastAction === 'shuffle' ? (
+			) : lastAction === 'setup-shuffle' ? (
 				<button
 					data-next-action="true"
 					onClick={() => setState({type: 'setup-attackers-draw'})}
