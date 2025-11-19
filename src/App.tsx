@@ -405,24 +405,17 @@ function App() {
 			<div data-slot="your-hand">
 				{state.players[0].hand.map((cardId, i) => {
 					const selectedPlacement = tmpSetupPlacementState.includes(cardId)
-					const selectable =
-						(shouldPlaceAttackers ||
-							shouldPlaceDefendersFront ||
-							shouldPlaceDefendersBack) &&
-						!selectedPlacement
+					const selectable = /^setup(.+)place$/.test(nextAction) && !selectedPlacement
 
-					const action =
-						shouldPlaceAttackers ||
-						shouldPlaceDefendersFront ||
-						shouldPlaceDefendersBack
-							? () => {
-									setSetupPlacementState(tmpState =>
-										selectedPlacement
-											? tmpState.filter(aCardId => aCardId !== cardId)
-											: tmpState.concat([cardId])
-									)
-							  }
-							: undefined
+					const action = /^setup(.+)place$/.test(nextAction)
+						? () => {
+								setSetupPlacementState(tmpState =>
+									selectedPlacement
+										? tmpState.filter(aCardId => aCardId !== cardId)
+										: tmpState.concat([cardId])
+								)
+						  }
+						: undefined
 
 					return (
 						<div
