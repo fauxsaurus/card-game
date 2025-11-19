@@ -473,7 +473,10 @@ function App() {
 					Draw Hand
 				</button>
 			) : lastAction === 'setup-draw-hand' ? (
-				<button onClick={() => setState({type: 'turn-draw-card', player: 0})}>
+				<button
+					data-next-action="true"
+					onClick={() => setState({type: 'turn-draw-card', player: 0})}
+				>
 					Draw Card (P1)
 				</button>
 			) : (
