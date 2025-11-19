@@ -437,39 +437,38 @@ function App() {
 					)
 				})}
 			</div>
-			{/* @ts-expect-error TypeScript's less-than-perfect type inference leads to a lack of overlap with 'none' (i.e., Check the variable declaration, 'none' is a perfectly acceptable value.) */}
-			{lastAction === 'none' ? (
+			{nextAction === 'setup-shuffle' ? (
 				<button data-next-action="true" onClick={() => setState({type: 'setup-shuffle'})}>
 					Shuffle Decks
 				</button>
-			) : lastAction === 'setup-shuffle' ? (
+			) : nextAction === 'setup-attackers-draw' ? (
 				<button
 					data-next-action="true"
 					onClick={() => setState({type: 'setup-attackers-draw'})}
 				>
 					Draw Cards for Attacker Setup
 				</button>
-			) : shouldPlaceAttackers ? (
+			) : nextAction === 'setup-attackers-place' ? (
 				'Place Attackers'
-			) : lastAction === 'setup-attackers-place' ? (
+			) : nextAction === 'setup-defenders-front-draw' ? (
 				<button
 					data-next-action="true"
 					onClick={() => setState({type: 'setup-defenders-front-draw'})}
 				>
 					Draw Cards for Frontline Defender Setup
 				</button>
-			) : lastAction === 'setup-defenders-front-place' ? (
+			) : nextAction === 'setup-defenders-back-draw' ? (
 				<button
 					data-next-action="true"
 					onClick={() => setState({type: 'setup-defenders-back-draw'})}
 				>
 					Draw Cards for Back line Defender Setup
 				</button>
-			) : lastAction === 'setup-defenders-back-place' ? (
+			) : nextAction === 'setup-draw-hand' ? (
 				<button data-next-action="true" onClick={() => setState({type: 'setup-draw-hand'})}>
 					Draw Hand
 				</button>
-			) : lastAction === 'setup-draw-hand' ? (
+			) : nextAction === 'turn-draw-card' ? (
 				<button
 					data-next-action="true"
 					onClick={() => setState({type: 'turn-draw-card', player: 0})}
