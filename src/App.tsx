@@ -490,7 +490,10 @@ function App() {
 			)}
 			<output>
 				<header>Debug State:</header>
+				<b>Current Phase: {nextAction}</b>
 				<pre>{stringifyState(state)}</pre>
+				<b>Tentative State</b>
+				<pre>{stringifyState(tentativeState)}</pre>
 			</output>
 		</section>
 	)
