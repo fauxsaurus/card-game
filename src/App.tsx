@@ -5,6 +5,7 @@ import {
 	CardFace,
 	CardSlot,
 	createState,
+	discardCards,
 	drawCard,
 	drawHand,
 	setupAttackersDraw,
@@ -20,6 +21,10 @@ import {
 import {Todo} from './todo'
 
 import './App.css'
+
+type FN<I extends unknown[] = [], O = void> = (...args: I) => O
+
+const MAX_HAND_LENGTH = 3
 
 const stringifyState = <T,>(obj: T, space = 4) => {
 	const jsonString = JSON.stringify(
@@ -93,6 +98,10 @@ const reducer = (state: IState, action: IAction) => {
 			drawCard(state, action)
 			break
 
+		case 'turn-discard-cards':
+			discardCards(state, action)
+			break
+
 		default:
 			console.log(action)
 	}
@@ -102,9 +111,24 @@ const reducer = (state: IState, action: IAction) => {
 	return state
 }
 
-type IActionType = IState['history'][number]['type'][]
+type IActionType = IState['history'][number]['type']
 
-const getNextActions = (state: IState): IActionType => {
+const whoseTurnIsIt = (state: IState): -1 | 0 | 1 => {
+	const lastAction = state.history.slice(-1)[0]
+	if (!lastAction) return -1 // not started, neither
+
+	const lastActionType = lastAction.type
+	if (lastActionType === 'setup-draw-hand') return 0 // p1
+
+	if (/^setup|^end/.test(lastActionType)) return -1 // neither
+
+	if (lastActionType === 'turn-end') return ([1, 0] as const)[lastAction.player] // opposite player
+
+	/** @ts-expect-error implicit ^turn */
+	return lastAction.player
+}
+
+const getNextActions = (state: IState): IActionType[] => {
 	const lastActionType = state.history.slice(-1)[0]?.type ?? ''
 	if (!lastActionType) return ['setup-shuffle']
 
@@ -138,13 +162,14 @@ const getNextActions = (state: IState): IActionType => {
 	if (p1Wins || p2Wins) return ['end-victory']
 	// </check4victory>
 
-	if (lastActionType === 'turn-end') return ['turn-draw-card']
+	// stalemate check
+	if (state.history.slice(-2).every(action => action.type === 'turn-end')) return ['end-draw']
+
+	const whoseTurn = whoseTurnIsIt(state) as 0 | 1 // made it this far ? it will not be -1
+	const cardsLeft2draw = state.players[whoseTurn].deck.length > 0
+	if (lastActionType === 'turn-end' && cardsLeft2draw) return ['turn-draw-card']
 
 	// <list-options-left>
-	// Who made the last move?
-	/** @ts-expect-error All ^turn actions will have a player prop */
-	const whoseTurn = state.history.slice(-1)[0].player
-
 	// get all actions taken by the player this turn
 	/** @ts-expect-error All ^turn actions will have a player prop */
 	const lastOpponentActionI = state.history.findLastIndex(action => action.player !== whoseTurn)
@@ -153,6 +178,25 @@ const getNextActions = (state: IState): IActionType => {
 	// return actions not yet taken
 	return (['turn-play-card', 'turn-activate-ability', 'turn-attack', 'turn-end'] as const).filter(
 		actionType => !actionsTakenThisTurn.includes(actionType)
+	)
+}
+
+const EndTurnButton = ({disabled = false, onClick}: {disabled?: boolean; onClick: FN}) => (
+	<button disabled={disabled} onClick={onClick}>
+		End Turn
+	</button>
+)
+
+const DiscardCardsButton = ({state, onClick}: {state: IState; onClick: FN}) => {
+	const playerNumber = whoseTurnIsIt(state)
+	if (playerNumber === -1) return playerNumber
+
+	const cards2discard = state.players[playerNumber].hand.length - MAX_HAND_LENGTH
+
+	return (
+		<button disabled={cards2discard < 1} onClick={onClick}>
+			Discard Cards {`(x${cards2discard > 0 ? cards2discard : 0})`}
+		</button>
 	)
 }
 
@@ -194,20 +238,50 @@ function App() {
 	const foeAttackers = state.players[1].attackers
 	const foeDefenders = state.players[1].defenders
 
+	const playerXsTurn = whoseTurnIsIt(state)
+	const cards2discard =
+		playerXsTurn === -1 ? 0 : state.players[playerXsTurn].hand.length - MAX_HAND_LENGTH
+
+	const [phaseInProgress, setPhaseInProgress] = useState<IActionType | ''>('')
 	const nextActions = getNextActions(state)
 	const nextAction = nextActions[0]
 
-	// place cards (in setup phase)
+	// place cards (in setup phase), discard phase
 	useEffect(() => {
-		if (!/^setup(.+)place$/.test(nextAction)) return
-		if (tmpSetupPlacementState.length !== 3) return
+		const settingUp = /^setup(.+)place$/.test(nextAction)
+		const discarding = phaseInProgress === 'turn-discard-cards'
 
+		if (!settingUp && !discarding) return
+
+		if (settingUp) {
+			if (tmpSetupPlacementState.length !== 3) return
+			setSetupPlacementState([])
+			setState({
+				type: nextAction,
+				order: [tmpSetupPlacementState, state.players[1].hand],
+			} as IAction)
+
+			return
+		}
+
+		// implicit discarding
+		if (tmpSetupPlacementState.length !== cards2discard) return
+
+		setPhaseInProgress('')
 		setSetupPlacementState([])
 		setState({
-			type: nextAction,
-			order: [tmpSetupPlacementState, state.players[1].hand],
-		} as IAction)
-	}, [nextAction, state.players, tmpSetupPlacementState])
+			type: 'turn-discard-cards',
+			player: playerXsTurn as 0 | 1,
+			cards: tmpSetupPlacementState,
+		})
+	}, [
+		cards2discard,
+		nextAction,
+		phaseInProgress,
+		playerXsTurn,
+		state.players,
+		tmpSetupPlacementState,
+	])
 
 	return (
 		<section data-component="table">
@@ -455,17 +529,22 @@ function App() {
 			<div data-slot="your-hand">
 				{state.players[0].hand.map((cardId, i) => {
 					const selectedPlacement = tmpSetupPlacementState.includes(cardId)
-					const selectable = /^setup(.+)place$/.test(nextAction) && !selectedPlacement
+					const selectable =
+						(/^setup(.+)place$/.test(nextAction) ||
+							phaseInProgress === 'turn-discard-cards') &&
+						!selectedPlacement
 
-					const action = /^setup(.+)place$/.test(nextAction)
-						? () => {
-								setSetupPlacementState(tmpState =>
-									selectedPlacement
-										? tmpState.filter(aCardId => aCardId !== cardId)
-										: tmpState.concat([cardId])
-								)
-						  }
-						: undefined
+					const action =
+						/^setup(.+)place$/.test(nextAction) ||
+						phaseInProgress === 'turn-discard-cards'
+							? () => {
+									setSetupPlacementState(tmpState =>
+										selectedPlacement
+											? tmpState.filter(aCardId => aCardId !== cardId)
+											: tmpState.concat([cardId])
+									)
+							  }
+							: undefined
 
 					return (
 						<div
@@ -514,12 +593,39 @@ function App() {
 			) : nextAction === 'turn-draw-card' ? (
 				<button
 					data-next-action="true"
-					onClick={() => setState({type: 'turn-draw-card', player: 0})}
+					onClick={() =>
+						setState({type: 'turn-draw-card', player: playerXsTurn as 0 | 1})
+					}
 				>
-					Draw Card (P1)
+					Draw Card (P{[1, 2][playerXsTurn]})
 				</button>
+			) : /^turn/.test(nextAction) ? (
+				<div style={{display: 'flex'}}>
+					<button disabled>Play Card</button>
+					<button disabled>Activate Ability</button>
+					<button disabled>Attack</button>
+					<DiscardCardsButton
+						state={state}
+						onClick={() =>
+							playerXsTurn === 0
+								? setPhaseInProgress('turn-discard-cards')
+								: setState({
+										type: 'turn-discard-cards',
+										player: playerXsTurn as 0 | 1,
+										cards: state.players[playerXsTurn as 0 | 1].hand.slice(
+											0,
+											cards2discard
+										),
+								  })
+						}
+					/>
+					<EndTurnButton
+						disabled={playerXsTurn === -1}
+						onClick={() => setState({type: 'turn-end', player: playerXsTurn as 0 | 1})}
+					/>
+				</div>
 			) : (
-				'End of Supported Gameplay'
+				''
 			)}
 			<output>
 				<header>Debug State:</header>

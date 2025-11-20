@@ -18,15 +18,20 @@ DX
 		HOW WOULD PLACING TWO CARDS WITH THE SAME CARD NUMBER WORK IN THE SETUP PHASE WITHOUT CARD LIST?
 			What if the card list was removed and cards merely maintained their id property? Would that solve everything?
 	replace foe's hand with <CardSlot>s
+	remove logic from <EndTurnButton> to replace it with a more generic button component (Actually, no, figure out where the end turn clickable would be--might not be a button long-term.)
+	create a utility action type IAction<'sub-type'> to return a particular type or all of the potential | action | union | types.
 Logic
 	allow dependency injection in the reducer to AI play test different rulesets and examine win rates
 		somehow need to manage the same on card event handlers and effects
 	create a display state (based on intermediate tmp setup state) and have the tentative move attribute be filled by checking for differences with display state and intermediate state to greatly simplify attribute passing to card slots.
 	Could/should the player property be dropped from action (i.e., if the player whose turn it is can be calculated programmatically, then such data is unnecessary)
+	Have an effect automatically set phaseInProgress when matching /^setup(.+)place$/? (To centralize all in progress states? How should this behave when the buttons are removed from the board and many cards are selectable at any given moment?)
 performance
 	improve tentativeState calculation with immer and/or jotai atoms
 AI
-	allow the AI to strategically place cards in the setup phase
+	allow the AI to strategically 
+		place cards in the setup phase
+		discard cards
 Licensing
 	determine proper license (potentially dual licensing code and art)
 Gameplay
