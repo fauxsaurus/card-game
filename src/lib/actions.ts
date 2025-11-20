@@ -21,6 +21,7 @@ export type IAction =
 	  }
 	| {type: 'turn-activate-ability'; player: 0 | 1; card: IInt}
 	| {type: 'turn-attack'; player: 0 | 1; from: IInt; to: IInt}
+	| {type: 'turn-discard-cards'; player: 0 | 1; cards: IInt[]}
 	| {type: 'turn-end'; player: 0 | 1}
 	// victory
 	| {type: 'end-victory'; player: 0 | 1}

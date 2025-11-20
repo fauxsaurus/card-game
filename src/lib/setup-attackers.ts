@@ -1,4 +1,4 @@
-import {drawFullHand} from './draw-hand'
+import {drawFullHand} from './hand'
 import type {IState} from './state'
 
 type IInt = number
