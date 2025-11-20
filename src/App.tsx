@@ -620,7 +620,7 @@ function App() {
 						}
 					/>
 					<EndTurnButton
-						disabled={playerXsTurn === -1}
+						disabled={playerXsTurn === -1 || cards2discard > 0}
 						onClick={() => setState({type: 'turn-end', player: playerXsTurn as 0 | 1})}
 					/>
 				</div>
