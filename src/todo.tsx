@@ -28,10 +28,12 @@ Logic
 	Have an effect automatically set phaseInProgress when matching /^setup(.+)place$/? (To centralize all in progress states? How should this behave when the buttons are removed from the board and many cards are selectable at any given moment?)
 performance
 	improve tentativeState calculation with immer and/or jotai atoms
+	allow cards with relevant abilities to attack from the back in whichCardsCanAttack()
 AI
 	allow the AI to strategically 
 		place cards in the setup phase
 		discard cards
+		attack: period (at random), strategically (based on ability to win), cunningly (by calculating the odds of facedown cards having higher def by analyzing cards played thus far from deck and field bonuses)
 Licensing
 	determine proper license (potentially dual licensing code and art)
 Gameplay

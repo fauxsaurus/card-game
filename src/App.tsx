@@ -223,6 +223,51 @@ const calculateTentativeState = (state: IState, tmpSetupPlacementState: number[]
 	return copyOfState
 }
 
+const canCurrentPlayerAttack = (state: IState) => {
+	const nextActions = getNextActions(state)
+	if (nextActions.length === 1) return false
+	// If able to attack, also able to end turn (only on action is ever available in the setup phase).
+
+	// if multiple actions, it is a ^turn (therefore player will not be -1)
+	const playerXsTurn = whoseTurnIsIt(state) as 0 | 1
+	const otherPlayerI = [1, 0][playerXsTurn] as 0 | 1
+
+	const currentPlayer = state.players[playerXsTurn]
+	const otherPlayer = state.players[otherPlayerI]
+
+	const [youHaveAttackers, youHaveDefenders, theyHaveAttackers] = [
+		currentPlayer.attackers,
+		currentPlayer.defenders,
+		otherPlayer.attackers,
+	].map(object => !!Object.keys(object).length)
+
+	// a player must always have defenders, else they lost--so only count attackers
+	return youHaveAttackers || (youHaveDefenders && theyHaveAttackers)
+
+	// const whichCardsCanAttack = (state: IState) => {
+	// SHOULD THIS BE COMBINED WITH `canCurrentPlayerAttack()`? totes probs (since many of the same checks need to be performed and if cards can attack, then the player can attack, lol)
+
+	const attackersOfYoursAble2Attack = [0, 1, 2]
+		// no allies blocking
+		.flatMap(i =>
+			currentPlayer.attackers[i] ? [i] : currentPlayer.attackers[i + 3] ? [i + 3] : []
+		)
+		// has foes across from it (capped to front and background bounds in case of back row attackers)
+		.filter(i => otherPlayer.defenders[i % 3] || otherPlayer.defenders[(i + 3) % 6])
+
+	const defendersOfYoursAble2Attack = [0, 1, 2]
+		// no allies blocking
+		.flatMap(i =>
+			currentPlayer.defenders[i] ? [i] : currentPlayer.defenders[i + 3] ? [i + 3] : []
+		)
+		// has foes across from it (capped to front and background bounds in case of back row attackers)
+		.filter(i => otherPlayer.attackers[i % 3] || otherPlayer.attackers[(i + 3) % 6])
+		// are faceup
+		.filter(i => !currentPlayer.defenders[i][1])
+
+	return [attackersOfYoursAble2Attack, defendersOfYoursAble2Attack]
+}
+
 const immerReducer = produce(reducer)
 
 function App() {
@@ -299,11 +344,12 @@ function App() {
 					label="deck"
 					name="foes-deck"
 				/>
+
 				<CardSlot
 					cardList={state.cardList}
-					card={foeAttackers[5]}
+					card={foeAttackers[3]}
 					label="A"
-					name="foes-attacker-5"
+					name="foes-attacker-3"
 				/>
 				<CardSlot
 					cardList={state.cardList}
@@ -313,16 +359,16 @@ function App() {
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={foeAttackers[3]}
-					label="K"
-					name="foes-attacker-3"
+					card={foeAttackers[5]}
+					label="A"
+					name="foes-attacker-5"
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={foeDefenders[5]?.[0]}
-					facedown={!!foeDefenders[5]?.[1]}
+					card={foeDefenders[3]?.[0]}
+					facedown={!!foeDefenders[3]?.[1]}
 					label="D"
-					name="foes-defender-5"
+					name="foes-defender-3"
 				/>
 				<CardSlot
 					cardList={state.cardList}
@@ -333,10 +379,10 @@ function App() {
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={foeDefenders[3]?.[0]}
-					facedown={!!foeDefenders[3]?.[1]}
+					card={foeDefenders[5]?.[0]}
+					facedown={!!foeDefenders[5]?.[1]}
 					label="F"
-					name="foes-defender-3"
+					name="foes-defender-5"
 				/>
 				<CardSlot cardList={state.cardList} name="foes-empty-slot" />
 				{/* new row */}
@@ -348,10 +394,11 @@ function App() {
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={foeAttackers[2]}
+					card={foeAttackers[0]}
 					label="A"
-					name="foes-attacker-2"
+					name="foes-attacker-0"
 				/>
+
 				<CardSlot
 					cardList={state.cardList}
 					card={foeAttackers[1]}
@@ -360,16 +407,16 @@ function App() {
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={foeAttackers[0]}
+					card={foeAttackers[2]}
 					label="K"
-					name="foes-attacker-0"
+					name="foes-attacker-2"
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={foeDefenders[2]?.[0]}
-					facedown={!!foeDefenders[2]?.[1]}
+					card={foeDefenders[0]?.[0]}
+					facedown={!!foeDefenders[0]?.[1]}
 					label="D"
-					name="foes-defender-2"
+					name="foes-defender-0"
 				/>
 				<CardSlot
 					cardList={state.cardList}
@@ -380,10 +427,10 @@ function App() {
 				/>
 				<CardSlot
 					cardList={state.cardList}
-					card={foeDefenders[0]?.[0]}
-					facedown={!!foeDefenders[0]?.[1]}
+					card={foeDefenders[2]?.[0]}
+					facedown={!!foeDefenders[2]?.[1]}
 					label="F"
-					name="foes-defender-0"
+					name="foes-defender-2"
 				/>
 				<CardSlot
 					cardList={state.cardList}
@@ -603,7 +650,14 @@ function App() {
 				<div style={{display: 'flex'}}>
 					<button disabled>Play Card</button>
 					<button disabled>Activate Ability</button>
-					<button disabled>Attack</button>
+					<button
+						disabled={!canCurrentPlayerAttack(state)}
+						onClick={() => {
+							if (playerXsTurn === 0) setPhaseInProgress('turn-attack')
+						}}
+					>
+						Attack
+					</button>
 					<DiscardCardsButton
 						state={state}
 						onClick={() =>
